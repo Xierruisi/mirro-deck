@@ -26,6 +26,18 @@ npm run tauri dev
 
 ## 提交代码
 
+提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)：
+
+```text
+<类型>(<可选作用域>): <描述>
+```
+
+类型可使用 `build`、`chore`、`ci`、`docs`、`feat`、`fix`、`perf`、
+`refactor`、`revert`、`style` 或 `test`。例如：
+`feat(device): add wireless pairing`。执行 `npm ci` 后，Git `commit-msg`
+钩子会自动检查新提交；也可以运行 `npm run commitlint -- --last` 手动检查
+最新提交。Pull Request CI 会检查分支中的每个提交。
+
 1. 从最新的 `main` 分支创建功能分支。
 2. 保持改动聚焦；不要在同一个 Pull Request 中混入无关重构。
 3. 为行为变化补充或更新测试，并同步必要的文档。

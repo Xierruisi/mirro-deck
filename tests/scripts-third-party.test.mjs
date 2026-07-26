@@ -13,14 +13,16 @@ test("reviews every npm package license and reports a stable summary", () => {
       "node_modules/a": { license: "MIT" },
       "node_modules/b": { license: "Apache-2.0" },
       "node_modules/c": { license: "MIT" },
+      "node_modules/d": { license: "Python-2.0" },
     },
   });
 
   assert.deepEqual(result, {
-    packageCount: 3,
+    packageCount: 4,
     licenses: {
       "Apache-2.0": 1,
       MIT: 2,
+      "Python-2.0": 1,
     },
   });
 });

@@ -26,6 +26,18 @@ npm run tauri dev
 
 ## Submitting code
 
+Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```text
+<type>(<optional-scope>): <description>
+```
+
+Use one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`,
+`revert`, `style`, or `test`. For example: `feat(device): add wireless pairing`.
+After `npm ci`, the Git `commit-msg` hook checks new commits automatically.
+To check the latest commit manually, run `npm run commitlint -- --last`.
+Pull Request CI checks every commit in the branch.
+
 1. Create a feature branch from the latest `main`.
 2. Keep changes focused; do not include unrelated refactoring in the same Pull Request.
 3. Add or update tests for behavior changes, and update the relevant documentation.

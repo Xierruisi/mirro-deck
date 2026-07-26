@@ -10,6 +10,7 @@ export const approvedNpmLicenses = Object.freeze([
   "MIT",
   "MIT OR Apache-2.0",
   "MPL-2.0",
+  "Python-2.0",
 ]);
 
 export function reviewNpmLicenses(

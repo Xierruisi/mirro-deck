@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { isEnglishDefaultReadme } from "./check-docs-lib.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -74,7 +75,7 @@ for (const pair of githubPairs) {
 }
 
 const defaultReadme = fs.readFileSync(path.join(root, "README.md"), "utf8");
-if (!defaultReadme.startsWith("# MirroDeck\n\n**English**")) {
+if (!isEnglishDefaultReadme(defaultReadme)) {
   failures.push("README.md must remain the English-default GitHub entry point");
 }
 

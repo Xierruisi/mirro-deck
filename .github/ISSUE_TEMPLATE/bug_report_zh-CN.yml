@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        感谢反馈。提交前请搜索现有 Issue，并从日志和截图中移除设备序列号、IP 地址等敏感信息。安全漏洞请按照 SECURITY.zh-CN.md 私下报告。
+        感谢反馈。提交前请搜索现有 Issue，并从日志和截图中移除设备序列号、IP 地址等敏感信息。安全漏洞请按照 docs/SECURITY.zh-CN.md 私下报告。
 
   - type: input
     id: version

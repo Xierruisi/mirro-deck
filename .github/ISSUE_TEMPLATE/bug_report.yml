@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for the report. Search existing Issues before submitting, and remove device serial numbers, IP addresses, and other sensitive information from logs and screenshots. Report security vulnerabilities privately as described in SECURITY.md.
+        Thank you for the report. Search existing Issues before submitting, and remove device serial numbers, IP addresses, and other sensitive information from logs and screenshots. Report security vulnerabilities privately as described in docs/SECURITY.md.
 
   - type: input
     id: version

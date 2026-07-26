@@ -8,7 +8,7 @@ Use this checklist for the first open-source publication and every production re
 
 - Confirm that the repository is named `xierruisi/mirro-deck`. If it is different, update the URLs in `package.json`, `Cargo.toml`, `README.md`, `src/config.ts`, and `src-tauri/tauri.conf.json`.
 - Confirm the Apache-2.0 license and verify the copyright name and year in `LICENSE`.
-- In GitHub **Settings → Code security and analysis**, enable Private vulnerability reporting so the private reporting path described in `SECURITY.md` is available.
+- In GitHub **Settings → Code security and analysis**, enable Private vulnerability reporting so the private reporting path described in `docs/SECURITY.md` is available.
 - Configure a ruleset or branch protection for `main` that requires the Ubuntu, Windows, and macOS CI checks to pass.
 - Require the dependency-security checks, enable the dependency graph, and keep GitHub Actions restricted to full-length commit SHA references.
 - Confirm that the Actions `GITHUB_TOKEN` allows the Release job to request `contents: write`.

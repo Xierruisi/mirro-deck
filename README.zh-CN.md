@@ -19,7 +19,7 @@
     <a href="#功能特性">功能特性</a> ·
     <a href="#快速开始">快速开始</a> ·
     <a href="#本地开发">本地开发</a> ·
-    <a href="CONTRIBUTING.zh-CN.md">参与贡献</a>
+    <a href="docs/CONTRIBUTING.zh-CN.md">参与贡献</a>
   </p>
 </div>
 
@@ -128,11 +128,11 @@ vendor/scrcpy.json           固定版本的 scrcpy 包与 SHA-256
 
 ## 参与贡献
 
-欢迎提交 Bug、平台测试结果、翻译、文档和代码。创建 Issue 或 Pull Request 前，请先阅读[贡献指南](CONTRIBUTING.zh-CN.md)。
+欢迎提交 Bug、平台测试结果、翻译、文档和代码。创建 Issue 或 Pull Request 前，请先阅读[贡献指南](docs/CONTRIBUTING.zh-CN.md)。
 
 - 通过 [GitHub Issues](https://github.com/xierruisi/mirro-deck/issues) 报告问题或提出功能建议。
-- 根据[安全策略](SECURITY.zh-CN.md)私下报告安全漏洞。
-- 遵守项目的[社区行为准则](CODE_OF_CONDUCT.zh-CN.md)。
+- 根据[安全策略](docs/SECURITY.zh-CN.md)私下报告安全漏洞。
+- 遵守项目的[社区行为准则](docs/CODE_OF_CONDUCT.zh-CN.md)。
 - 在[更新日志](CHANGELOG.zh-CN.md)中查看版本记录。
 - 维护者可参考[发布检查清单](docs/release-checklist.zh-CN.md)。
 

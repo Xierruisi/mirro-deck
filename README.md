@@ -19,7 +19,7 @@
     <a href="#features">Features</a> ·
     <a href="#getting-started">Getting started</a> ·
     <a href="#development">Development</a> ·
-    <a href="CONTRIBUTING.md">Contributing</a>
+    <a href="docs/CONTRIBUTING.md">Contributing</a>
   </p>
 </div>
 
@@ -128,11 +128,11 @@ The frontend has no general-purpose shell permission. System operations go throu
 
 ## Contributing
 
-Bug reports, platform testing, translations, documentation, and code contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an Issue or Pull Request.
+Bug reports, platform testing, translations, documentation, and code contributions are welcome. Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) before opening an Issue or Pull Request.
 
 - Report bugs or request features through [GitHub Issues](https://github.com/xierruisi/mirro-deck/issues).
-- Report vulnerabilities privately by following [SECURITY.md](SECURITY.md).
-- Follow the project [Code of Conduct](CODE_OF_CONDUCT.md).
+- Report vulnerabilities privately by following [SECURITY.md](docs/SECURITY.md).
+- Follow the project [Code of Conduct](docs/CODE_OF_CONDUCT.md).
 - See [CHANGELOG.md](CHANGELOG.md) for release history.
 - Maintainers can follow the [release checklist](docs/release-checklist.md).
 

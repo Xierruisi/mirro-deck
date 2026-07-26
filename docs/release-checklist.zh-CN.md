@@ -8,7 +8,7 @@
 
 - 确认仓库名称为 `xierruisi/mirro-deck`；若不同，修改 `package.json`、`Cargo.toml`、`README.md`、`src/config.ts` 和 `src-tauri/tauri.conf.json` 中的地址。
 - 确认采用 Apache-2.0，并核对 `LICENSE` 中的版权名与年份。
-- 在 GitHub **Settings → Code security and analysis** 中启用 Private vulnerability reporting，使 `SECURITY.md` 中的私下报告入口可用。
+- 在 GitHub **Settings → Code security and analysis** 中启用 Private vulnerability reporting，使 `docs/SECURITY.zh-CN.md` 中的私下报告入口可用。
 - 为 `main` 配置 ruleset 或分支保护，要求 CI 的 Ubuntu、Windows 和 macOS 检查通过。
 - 将依赖安全检查设为必需，启用 dependency graph，并限制 GitHub Actions 仅引用完整提交 SHA。
 - 检查 Actions 的 `GITHUB_TOKEN` 允许 Release job 申请 `contents: write`。

@@ -7,9 +7,9 @@ const failures = [];
 const documentPairs = [
   ["README.md", "README.zh-CN.md"],
   ["CHANGELOG.md", "CHANGELOG.zh-CN.md"],
-  ["CODE_OF_CONDUCT.md", "CODE_OF_CONDUCT.zh-CN.md"],
-  ["CONTRIBUTING.md", "CONTRIBUTING.zh-CN.md"],
-  ["SECURITY.md", "SECURITY.zh-CN.md"],
+  ["docs/CODE_OF_CONDUCT.md", "docs/CODE_OF_CONDUCT.zh-CN.md"],
+  ["docs/CONTRIBUTING.md", "docs/CONTRIBUTING.zh-CN.md"],
+  ["docs/SECURITY.md", "docs/SECURITY.zh-CN.md"],
   ["THIRD_PARTY_NOTICES.md", "THIRD_PARTY_NOTICES.zh-CN.md"],
   ["docs/connection-guide.md", "docs/connection-guide.zh-CN.md"],
   ["docs/release-checklist.md", "docs/release-checklist.zh-CN.md"],

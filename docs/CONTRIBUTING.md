@@ -76,7 +76,7 @@ common hard-coded JSX or accessibility strings.
 Clearly explain the goal, implementation scope, and validation results, and link the relevant Issue. Include before-and-after screenshots for interface changes. For platform-specific changes, list the operating systems and architectures you tested. Maintainers may ask you to narrow the scope, add tests, or revise the implementation before merging.
 
 GitHub loads the English Pull Request template by default. A
-[Chinese Pull Request template](.github/PULL_REQUEST_TEMPLATE/pull_request_zh-CN.md)
+[Chinese Pull Request template](../.github/PULL_REQUEST_TEMPLATE/pull_request_zh-CN.md)
 is also available.
 
 ## Dependencies and copied code

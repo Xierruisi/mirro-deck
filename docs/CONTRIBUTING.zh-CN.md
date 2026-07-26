@@ -73,7 +73,7 @@ i18n 检查会拦截语言文件缺失或多余、翻译键缺失、占位符不
 请清楚说明改动目的、实现范围和验证结果，并关联相关 Issue。涉及界面变化时请附前后截图；涉及平台差异时请列出实际验证过的系统和架构。维护者可能要求缩小改动范围、补充测试或调整实现后再合并。
 
 GitHub 默认加载英文 Pull Request 模板。需要中文模板时，请使用
-[中文 Pull Request 模板](.github/PULL_REQUEST_TEMPLATE/pull_request_zh-CN.md)
+[中文 Pull Request 模板](../.github/PULL_REQUEST_TEMPLATE/pull_request_zh-CN.md)
 并将内容复制到 Pull Request 描述中。
 
 ## 依赖与复制代码

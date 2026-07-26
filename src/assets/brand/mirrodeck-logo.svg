@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 256" role="img" aria-labelledby="title desc">
+  <title id="title">MirroDeck logo</title>
+  <desc id="desc">MirroDeck wordmark with an interlocking M and D symbol inspired by bidirectional screen mirroring.</desc>
+  <defs>
+    <linearGradient id="logo-blue" x1="20" y1="18" x2="190" y2="292" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#496BFF" />
+      <stop offset="1" stop-color="#3151E8" />
+    </linearGradient>
+    <linearGradient id="logo-coral" x1="122" y1="28" x2="298" y2="294" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5C61" />
+      <stop offset="1" stop-color="#F03E55" />
+    </linearGradient>
+    <clipPath id="logo-blue-clip">
+      <path d="M33 23c-4.3-2.4-9 0.7-9 5.6v262.8c0 5.1 5.5 8.3 9.9 5.7l45.2-26.3a14 14 0 0 0 6.9-12V122l68 38v48l36-20.8a12 12 0 0 0 6-10.4v-56.6a13 13 0 0 0-6.8-11.4L33 23Z" />
+    </clipPath>
+  </defs>
+  <g transform="translate(8 8) scale(.75)">
+    <path
+      fill="url(#logo-blue)"
+      d="M33 23c-4.3-2.4-9 0.7-9 5.6v262.8c0 5.1 5.5 8.3 9.9 5.7l45.2-26.3a14 14 0 0 0 6.9-12V122l68 38v48l36-20.8a12 12 0 0 0 6-10.4v-56.6a13 13 0 0 0-6.8-11.4L33 23Z"
+    />
+    <path fill="#2942BE" clip-path="url(#logo-blue-clip)" d="m154 160 54 30-54 30v-60Z" />
+    <path
+      fill="url(#logo-coral)"
+      d="m142 67 87.6-48.6a11 11 0 0 1 10.7 0l48 26.7a15 15 0 0 1 7.7 13.1v203.7a15 15 0 0 1-7.8 13.2l-47.6 26.2a11 11 0 0 1-10.6 0l-111.3-49a6 6 0 0 1 0-10.1l71.3-41.2v49.2l46 25.7V80.8l-31.9 20.3L142 67Z"
+    />
+    <path fill="#C92E46" d="m190 201 46 25.7v49.2l-46-25.7V201Z" />
+  </g>
+  <text
+    x="278"
+    y="166"
+    fill="#171923"
+    font-family="Inter, 'SF Pro Display', 'Segoe UI', Arial, sans-serif"
+    font-size="108"
+    font-weight="700"
+    letter-spacing="-4.5"
+  >MirroDeck</text>
+</svg>

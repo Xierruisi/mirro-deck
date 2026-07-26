@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MirroDeck app icon</title>
+  <desc id="desc">The MirroDeck M and D symbol on a soft rounded-square background.</desc>
+  <defs>
+    <linearGradient id="icon-surface" x1="76" y1="52" x2="436" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#EEF2FF" />
+    </linearGradient>
+    <linearGradient id="icon-blue" x1="20" y1="18" x2="190" y2="292" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#496BFF" />
+      <stop offset="1" stop-color="#3151E8" />
+    </linearGradient>
+    <linearGradient id="icon-coral" x1="122" y1="28" x2="298" y2="294" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5C61" />
+      <stop offset="1" stop-color="#F03E55" />
+    </linearGradient>
+    <clipPath id="icon-blue-clip">
+      <path d="M33 23c-4.3-2.4-9 0.7-9 5.6v262.8c0 5.1 5.5 8.3 9.9 5.7l45.2-26.3a14 14 0 0 0 6.9-12V122l68 38v48l36-20.8a12 12 0 0 0 6-10.4v-56.6a13 13 0 0 0-6.8-11.4L33 23Z" />
+    </clipPath>
+    <filter id="icon-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="9" stdDeviation="10" flood-color="#1C2F86" flood-opacity=".16" />
+    </filter>
+  </defs>
+  <rect x="28" y="28" width="456" height="456" rx="108" fill="url(#icon-surface)" />
+  <rect x="28.75" y="28.75" width="454.5" height="454.5" rx="107.25" fill="none" stroke="#DDE4F7" stroke-width="1.5" />
+  <g filter="url(#icon-shadow)" transform="translate(80 80) scale(1.1)">
+    <path
+      fill="url(#icon-blue)"
+      d="M33 23c-4.3-2.4-9 0.7-9 5.6v262.8c0 5.1 5.5 8.3 9.9 5.7l45.2-26.3a14 14 0 0 0 6.9-12V122l68 38v48l36-20.8a12 12 0 0 0 6-10.4v-56.6a13 13 0 0 0-6.8-11.4L33 23Z"
+    />
+    <path fill="#2942BE" clip-path="url(#icon-blue-clip)" d="m154 160 54 30-54 30v-60Z" />
+    <path
+      fill="url(#icon-coral)"
+      d="m142 67 87.6-48.6a11 11 0 0 1 10.7 0l48 26.7a15 15 0 0 1 7.7 13.1v203.7a15 15 0 0 1-7.8 13.2l-47.6 26.2a11 11 0 0 1-10.6 0l-111.3-49a6 6 0 0 1 0-10.1l71.3-41.2v49.2l46 25.7V80.8l-31.9 20.3L142 67Z"
+    />
+    <path fill="#C92E46" d="m190 201 46 25.7v49.2l-46-25.7V201Z" />
+  </g>
+</svg>

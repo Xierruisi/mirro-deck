@@ -7,7 +7,7 @@ import { ChevronLeft, CircleAlert, Info, LoaderCircle, Play, RotateCcw, Square, 
 import { api } from "@/api";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppSettings, useSettingsSectionHeaders, type SettingsSection } from "@/components/app-settings";
-import { ConnectionDialog } from "@/components/connection-dialog";
+import { ConnectionDialog, type ConnectionDialogStep } from "@/components/connection-dialog";
 import { SettingsDashboard } from "@/components/settings-dashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,7 @@ function App() {
   const [scanError, setScanError] = useState<string>();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [connectionDialog, setConnectionDialog] = useState<"choose" | "pair" | "connect">();
+  const [connectionDialog, setConnectionDialog] = useState<ConnectionDialogStep>();
   const [address, setAddress] = useState("");
   const [pairingCode, setPairingCode] = useState("");
   const [operationMessage, setOperationMessage] = useState<string>();
@@ -237,19 +237,28 @@ function App() {
   }
 
   async function submitConnection() {
-    if (!connectionDialog) return;
+    if (connectionDialog !== "pair" && connectionDialog !== "connect") return;
     setOperationBusy(true);
     setOperationMessage(undefined);
     try {
-      const result = connectionDialog === "pair"
+      const isPairing = connectionDialog === "pair";
+      const result = isPairing
         ? await api.pair(address.trim(), pairingCode.trim())
         : await api.connect(address.trim());
-      setOperationMessage(operationResultMessage(result, t));
-      if (result.success) {
-        if (connectionDialog === "connect") {
-          setConnectionDialog(undefined);
-          setAddress("");
-        }
+      if (result.success && isPairing) {
+        setAddress("");
+        setPairingCode("");
+        setOperationMessage(t("dialog.pairSuccess"));
+        setConnectionDialog("connect");
+      } else {
+        setOperationMessage(operationResultMessage(result, t));
+      }
+      if (result.success && !isPairing) {
+        setConnectionDialog(undefined);
+        setAddress("");
+        setPairingCode("");
+      }
+      if (result.success && !isPairing) {
         await refreshDevices(true);
       }
     } catch (error) {
@@ -284,9 +293,18 @@ function App() {
     if (path) setOptions((current) => ({ ...current, recordPath: path }));
   }
 
-  function openConnectionDialog(type: "choose" | "pair" | "connect") {
+  function openConnectionDialog(type: ConnectionDialogStep) {
     setView("device");
     setOperationMessage(undefined);
+    setAddress("");
+    setPairingCode("");
+    setConnectionDialog(type);
+  }
+
+  function changeConnectionDialog(type?: ConnectionDialogStep) {
+    setOperationMessage(undefined);
+    setAddress("");
+    setPairingCode("");
     setConnectionDialog(type);
   }
 
@@ -445,7 +463,7 @@ function App() {
         pairingCode={pairingCode}
         busy={operationBusy}
         message={operationMessage}
-        onTypeChange={setConnectionDialog}
+        onTypeChange={changeConnectionDialog}
         onAddressChange={setAddress}
         onPairingCodeChange={setPairingCode}
         onGuideOpen={openConnectionGuide}

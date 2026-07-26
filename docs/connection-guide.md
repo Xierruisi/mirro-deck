@@ -35,17 +35,17 @@ The computer and Android device must be on the same local network. The first con
 
 1. Open **Developer options** on the device and enable **Wireless debugging**.
 2. Open **Wireless debugging**, then select **Pair device with pairing code**.
-3. In the lower-left corner of MirroDeck, select **Add device → Wireless pairing**.
+3. In the lower-left corner of MirroDeck, select **Add device → Wi-Fi connection**.
 4. Enter the **IP address and port** from the device's pairing dialog, for example `192.168.1.10:37099`.
 5. Enter the six-digit Wi-Fi pairing code shown on the device, then select **Start pairing**.
-6. After pairing succeeds, return to the connection method page.
+6. After pairing succeeds, MirroDeck automatically advances to the connection step.
 
 Pairing codes and pairing ports are usually valid for only a short time. If pairing fails, reopen **Pair device with pairing code** on the device and use the newly generated details.
 
 ### Step 2: connect the device
 
 1. Return to the main **Wireless debugging** page on the device and find the **IP address and port** shown near the top.
-2. In MirroDeck, select **Add device → Connect by address**.
+2. After pairing, use the connection step that MirroDeck opens automatically. If the device is already paired, select **Add device → Wi-Fi connection → Already paired? Continue to connect**.
 3. Enter the address from the main Wireless debugging page, then select **Connect device**.
 4. Wait for the device to appear in the left sidebar with the status **Available · Wi-Fi**.
 5. Select the device, then select **Start mirroring**.
@@ -57,7 +57,7 @@ Pairing codes and pairing ports are usually valid for only a short time. If pair
 If the device and computer were paired previously, you normally do not need another pairing code:
 
 1. Make sure the computer and device are still on the same local network, and enable **Wireless debugging** on the device.
-2. Select **Add device → Connect by address**.
+2. Select **Add device → Wi-Fi connection → Already paired? Continue to connect**.
 3. Enter the current IP address and port from the device's main **Wireless debugging** page.
 
 The port can change after the device reconnects to the network or Wireless debugging is turned off and on. If connection fails, use the address currently shown on the device.
@@ -96,7 +96,7 @@ The port can change after the device reconnects to the network or Wireless debug
 
 ### Pairing succeeds, but the device does not appear
 
-Pairing grants authorization but does not establish the current connection. Return to the main **Wireless debugging** page on the device, copy its connection address, then select **Add device → Connect by address** in MirroDeck.
+Pairing grants authorization but does not establish the current connection. Return to the main **Wireless debugging** page on the device, copy its connection address, then enter it in the connection step that MirroDeck opens automatically.
 
 ### Wireless connection fails
 

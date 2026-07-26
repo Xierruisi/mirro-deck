@@ -7,6 +7,17 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-27
+
+### Added
+
+- Guided USB connection instructions in the add-device dialog.
+
+### Changed
+
+- Streamlined device setup with separate USB and wireless paths, a guided Wi-Fi pairing flow, and clearer connection feedback.
+- Moved community health documents into the documentation directory and updated all related links and checks.
+
 ## [0.1.0] - 2026-07-26
 
 ### Added
@@ -26,5 +37,6 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 - Local builds no longer require the private updater signing key.
 - GitHub Actions are pinned to immutable commits and release validation runs the full quality and dependency-security gates.
 
-[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.1
 [0.1.0]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.0

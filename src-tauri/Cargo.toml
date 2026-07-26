@@ -1,6 +1,6 @@
 [package]
 name = "mirro-deck"
-version = "0.1.0"
+version = "0.1.1"
 description = "A cross-platform graphical launcher for scrcpy"
 authors = ["xierruisi"]
 edition = "2024"

@@ -1,7 +1,7 @@
 {
   "name": "mirro-deck",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A cross-platform graphical launcher for scrcpy",
   "license": "Apache-2.0",
   "repository": {

@@ -1,0 +1,25 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "dialog:allow-save",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://github.com/xierruisi/mirro-deck*" },
+        { "url": "https://github.com/Genymobile/scrcpy*" },
+        { "url": "https://github.com/tauri-apps/tauri*" }
+      ]
+    },
+    "process:allow-restart",
+    "updater:allow-check",
+    "updater:allow-download-and-install"
+  ]
+}

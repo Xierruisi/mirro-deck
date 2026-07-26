@@ -1,0 +1,36 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+*.key
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.mobileprovision
+.cache/
+.tauri-release-override.json
+src-tauri/resources/toolchains/*
+!src-tauri/resources/toolchains/.gitkeep
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,0 +1,302 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag matching the app version (for example, v0.1.0)
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+    outputs:
+      release_tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@35a842e360814583e976785eeda0bd0655cb8e83 # 1.97.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: src-tauri -> target
+          key: release-validation
+          cache-on-failure: true
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run full quality checks
+        run: npm run check
+
+      - name: Audit npm dependencies
+        run: npm audit --audit-level=high
+
+      - name: Audit Cargo dependencies
+        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: src-tauri
+
+      - name: Check tag, application versions, and changelog
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          node scripts/check-release-version.mjs "$RELEASE_TAG"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: validate
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS Apple Silicon
+            os: macos-15
+            target: aarch64-apple-darwin
+            scrcpy_target: macos-aarch64
+            bundles: app,dmg
+          - name: macOS Intel
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            scrcpy_target: macos-x86_64
+            bundles: app,dmg
+          - name: Windows x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            scrcpy_target: windows-x86_64
+            bundles: nsis
+          - name: Windows ARM64
+            os: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            scrcpy_target: windows-aarch64
+            bundles: nsis
+          - name: Linux x64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            scrcpy_target: linux-x86_64
+            bundles: appimage
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@35a842e360814583e976785eeda0bd0655cb8e83 # 1.97.0
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.target }}
+          cache-on-failure: true
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Prepare pinned scrcpy toolchain
+        run: npm run tools:prepare
+        env:
+          SCRCPY_TARGET: ${{ matrix.scrcpy_target }}
+
+      - name: Configure Windows code-signing certificate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if (
+            [string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE) -or
+            [string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_PASSWORD)
+          ) {
+            Write-Output "::notice::Windows signing secrets are incomplete; the installer will be built unsigned."
+            exit 0
+          }
+
+          $certificatePath = Join-Path $env:RUNNER_TEMP "mirrodeck-signing.pfx"
+          try {
+            $certificateBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          } catch {
+            throw "WINDOWS_CERTIFICATE is not valid Base64: $($_.Exception.Message)"
+          }
+          [IO.File]::WriteAllBytes($certificatePath, $certificateBytes)
+
+          $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $certificate = Import-PfxCertificate `
+            -FilePath $certificatePath `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -Password $password |
+            Where-Object HasPrivateKey |
+            Select-Object -First 1
+          if ($null -eq $certificate) {
+            throw "The imported PFX does not contain a certificate with a private key."
+          }
+
+          "WINDOWS_CERTIFICATE_THUMBPRINT=$($certificate.Thumbprint)" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Configure updater artifact signing
+        id: updater
+        shell: bash
+        env:
+          UPDATER_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          WINDOWS_CERTIFICATE_THUMBPRINT: ${{ env.WINDOWS_CERTIFICATE_THUMBPRINT }}
+        run: |
+          if [[ -n "$UPDATER_PRIVATE_KEY" ]]; then
+            echo "upload_updater_json=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "upload_updater_json=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::The updater signing key is unavailable; updater artifacts are disabled for this build."
+          fi
+
+          node --input-type=module --eval \
+            'import { writeFileSync } from "node:fs";
+             const bundle = {
+               createUpdaterArtifacts: Boolean(process.env.UPDATER_PRIVATE_KEY)
+             };
+             if (process.env.WINDOWS_CERTIFICATE_THUMBPRINT) {
+               bundle.windows = {
+                 certificateThumbprint: process.env.WINDOWS_CERTIFICATE_THUMBPRINT,
+                 digestAlgorithm: "sha256",
+                 timestampUrl: "http://timestamp.digicert.com"
+               };
+             }
+             writeFileSync(".tauri-release-override.json", JSON.stringify({ bundle }));'
+          echo "config_arg=--config .tauri-release-override.json" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Apple signing certificate
+        if: runner.os == 'macOS'
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+          NOTARIZATION_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [[ -z "$BUILD_CERTIFICATE_BASE64" || -z "$P12_PASSWORD" || -z "$SIGNING_IDENTITY" ]]; then
+            echo "::notice::Apple signing secrets are incomplete; the macOS bundle will be built unsigned."
+            exit 0
+          fi
+
+          certificate_path="$RUNNER_TEMP/apple-signing-certificate.p12"
+          keychain_path="$RUNNER_TEMP/app-signing.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+
+          printf '%s' "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$certificate_path"
+          security create-keychain -p "$keychain_password" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$keychain_password" "$keychain_path"
+          security import "$certificate_path" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
+          security list-keychains -d user -s "$keychain_path"
+          security find-identity -v -p codesigning "$keychain_path" | grep -F "$SIGNING_IDENTITY"
+
+          printf 'APPLE_SIGNING_IDENTITY=%s\n' "$SIGNING_IDENTITY" >> "$GITHUB_ENV"
+
+          if [[ -n "$NOTARIZATION_APPLE_ID" && -n "$NOTARIZATION_PASSWORD" && -n "$NOTARIZATION_TEAM_ID" ]]; then
+            printf 'APPLE_ID=%s\n' "$NOTARIZATION_APPLE_ID" >> "$GITHUB_ENV"
+            printf 'APPLE_PASSWORD=%s\n' "$NOTARIZATION_PASSWORD" >> "$GITHUB_ENV"
+            printf 'APPLE_TEAM_ID=%s\n' "$NOTARIZATION_TEAM_ID" >> "$GITHUB_ENV"
+          else
+            echo "::notice::Apple notarization secrets are incomplete; the signed macOS bundle will not be notarized."
+          fi
+
+      - name: Sign nested macOS executables
+        if: runner.os == 'macOS'
+        run: |
+          if [[ -z "${APPLE_SIGNING_IDENTITY:-}" ]]; then
+            echo "::notice::Apple signing secrets are unavailable; applying ad-hoc signatures to bundled executables."
+            codesign --force --sign - "src-tauri/resources/toolchains/${{ matrix.scrcpy_target }}/adb"
+            codesign --force --sign - "src-tauri/resources/toolchains/${{ matrix.scrcpy_target }}/scrcpy"
+            exit 0
+          fi
+
+          codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" "src-tauri/resources/toolchains/${{ matrix.scrcpy_target }}/adb"
+          codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" "src-tauri/resources/toolchains/${{ matrix.scrcpy_target }}/scrcpy"
+
+      - name: Build and upload release artifacts
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCRCPY_TARGET: ${{ matrix.scrcpy_target }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ needs.validate.outputs.release_tag }}
+          releaseName: MirroDeck ${{ needs.validate.outputs.release_tag }}
+          releaseBody: Cross-platform desktop packages. See the README for platform-specific setup notes.
+          releaseCommitish: ${{ github.sha }}
+          releaseDraft: true
+          prerelease: false
+          generateReleaseNotes: true
+          uploadUpdaterJson: ${{ steps.updater.outputs.upload_updater_json }}
+          retryAttempts: 2
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} ${{ steps.updater.outputs.config_arg }}
+
+      - name: Clean up Apple signing material
+        if: always() && runner.os == 'macOS'
+        run: |
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/apple-signing-certificate.p12"
+
+      - name: Clean up Windows signing material
+        if: always() && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not [string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_THUMBPRINT)) {
+            Remove-Item "Cert:\CurrentUser\My\$env:WINDOWS_CERTIFICATE_THUMBPRINT" -Force -ErrorAction SilentlyContinue
+          }
+          Remove-Item (Join-Path $env:RUNNER_TEMP "mirrodeck-signing.pfx") -Force -ErrorAction SilentlyContinue

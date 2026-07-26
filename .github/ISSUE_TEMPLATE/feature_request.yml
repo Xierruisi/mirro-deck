@@ -1,0 +1,58 @@
+name: Feature request
+description: Suggest a new capability, experience improvement, or platform
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the suggestion. Search existing Issues first and describe the need through a real use case whenever possible.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Use case and problem
+      description: Who encounters the problem, and in what situation?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the behavior or interaction you expect. A complete technical implementation is not required.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: How do you work around the problem today, and what other approaches have you considered?
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Relevant platforms
+      multiple: true
+      options:
+        - All platforms
+        - macOS
+        - Windows
+        - Linux
+        - Android device compatibility
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add mockups, screenshots, related links, or any other useful background.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I searched existing Issues and did not find the same request.
+          required: true

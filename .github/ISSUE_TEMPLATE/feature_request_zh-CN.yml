@@ -1,0 +1,58 @@
+name: 功能建议（中文）
+description: 用中文建议新的能力、体验改进或平台支持
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢建议。请先搜索现有 Issue，并尽量从实际使用场景说明需求。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用场景与问题
+      description: 谁会在什么场景遇到什么问题？
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 描述你期望的行为或交互，不要求提供完整技术实现。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 已考虑的替代方案
+      description: 当前如何绕过该问题？还考虑过哪些方案？
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: 相关平台
+      multiple: true
+      options:
+        - 所有平台
+        - macOS
+        - Windows
+        - Linux
+        - Android 设备兼容性
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息
+      description: 可附原型、截图、相关链接或其他背景。
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我已搜索现有 Issue，未发现相同建议。
+          required: true

@@ -1,0 +1,127 @@
+name: Bug 报告（中文）
+description: 用中文报告可以稳定复现的错误或兼容性问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请搜索现有 Issue，并从日志和截图中移除设备序列号、IP 地址等敏感信息。安全漏洞请按照 SECURITY.zh-CN.md 私下报告。
+
+  - type: input
+    id: version
+    attributes:
+      label: MirroDeck 版本
+      description: 可在“关于”页面或安装包文件名中查看。
+      placeholder: 例如 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: 操作系统
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: system_version
+    attributes:
+      label: 操作系统版本
+      placeholder: 例如 macOS 15.5、Windows 11 24H2、Ubuntu 24.04
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: 系统架构
+      options:
+        - arm64 / aarch64
+        - x86_64 / amd64
+        - x86 32 位
+        - 其他或不确定
+    validations:
+      required: true
+
+  - type: input
+    id: package
+    attributes:
+      label: 安装包
+      description: 请填写安装包的完整文件名或类型；源码运行请注明。
+      placeholder: 例如 MirroDeck_0.1.0_aarch64.dmg、NSIS exe、AppImage、源码构建
+    validations:
+      required: true
+
+  - type: input
+    id: scrcpy_version
+    attributes:
+      label: scrcpy 版本
+      description: 请填写应用内置或自行替换的 scrcpy 版本。
+      placeholder: 例如 4.1
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Android 设备与连接方式
+      description: 请填写设备型号、Android 版本，以及 USB、无线调试或模拟器等连接方式。
+      placeholder: 例如 Pixel 8、Android 15、USB
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 简要说明发生了什么，以及问题对使用的影响。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开……
+        2. 连接……
+        3. 点击……
+        4. 出现……
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 你认为正常情况下应该发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: 请粘贴错误信息或相关日志，并先清除敏感信息。
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 截图与补充信息
+      description: 可拖入截图或补充其他有助于定位问题的信息。
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我已搜索现有 Issue，未发现相同问题。
+          required: true
+        - label: 我已移除设备序列号、IP 地址、令牌、密钥等敏感信息。
+          required: true
+        - label: 这不是需要私下报告的安全漏洞。
+          required: true

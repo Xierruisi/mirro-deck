@@ -1,0 +1,127 @@
+name: Bug report
+description: Report a reproducible error or compatibility problem
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the report. Search existing Issues before submitting, and remove device serial numbers, IP addresses, and other sensitive information from logs and screenshots. Report security vulnerabilities privately as described in SECURITY.md.
+
+  - type: input
+    id: version
+    attributes:
+      label: MirroDeck version
+      description: Find this on the About page or in the installer filename.
+      placeholder: For example, 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: system_version
+    attributes:
+      label: Operating system version
+      placeholder: For example, macOS 15.5, Windows 11 24H2, or Ubuntu 24.04
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: System architecture
+      options:
+        - arm64 / aarch64
+        - x86_64 / amd64
+        - x86 32-bit
+        - Other or unknown
+    validations:
+      required: true
+
+  - type: input
+    id: package
+    attributes:
+      label: Package
+      description: Enter the complete installer filename or package type. Say so if running from source.
+      placeholder: For example, MirroDeck_0.1.0_aarch64.dmg, NSIS exe, AppImage, or source build
+    validations:
+      required: true
+
+  - type: input
+    id: scrcpy_version
+    attributes:
+      label: scrcpy version
+      description: Enter the bundled scrcpy version, or the replacement version if you changed it.
+      placeholder: For example, 4.1
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Android device and connection method
+      description: Include the device model, Android version, and whether you used USB, Wireless debugging, or an emulator.
+      placeholder: For example, Pixel 8, Android 15, USB
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: Briefly explain what happened and how it affected your use of the app.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Connect ...
+        3. Select ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste relevant errors or logs after removing sensitive information.
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshots and additional context
+      description: Drag in screenshots or add any other information that may help diagnose the problem.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I searched existing Issues and did not find the same problem.
+          required: true
+        - label: I removed device serial numbers, IP addresses, tokens, keys, and other sensitive information.
+          required: true
+        - label: This is not a security vulnerability that should be reported privately.
+          required: true

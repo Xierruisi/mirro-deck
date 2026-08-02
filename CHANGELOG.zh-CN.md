@@ -7,9 +7,17 @@ MirroDeck 的重要变更会记录在此文件中。版本号遵循
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-03
+
 ### 变更
 
 - 已配对的无线设备现在会通过 ADB 的持续 mDNS 发现自动重连，同时保留手动连接作为兜底。
+- 更新前端与 Rust 依赖，以及 CI 和发布工作流使用的固定版本 GitHub Actions。
+- 安全检查现在会显式跟踪 Tauri GTK/WebKit 上游暂时无法避免的 RustSec 公告；仅在仓库依赖图不可用时跳过依赖审查。
+
+### 修复
+
+- 修正 Windows 测试进程的标准错误重定向，使跨平台会话测试行为保持一致。
 
 ## [0.1.1] - 2026-07-27
 
@@ -41,6 +49,7 @@ MirroDeck 的重要变更会记录在此文件中。版本号遵循
 - 本地构建不再需要私有的 updater 签名密钥。
 - GitHub Actions 固定到不可变提交，发布校验会运行完整质量门和依赖安全检查。
 
-[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.2
 [0.1.1]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.1
 [0.1.0]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.0

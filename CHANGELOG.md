@@ -7,9 +7,17 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-03
+
 ### Changed
 
 - Paired wireless devices now reconnect automatically through persistent ADB mDNS discovery, while manual connection remains available as a fallback.
+- Updated frontend and Rust dependencies together with the pinned GitHub Actions used by CI and release workflows.
+- Security checks now explicitly track unavoidable upstream Tauri GTK/WebKit advisories and skip dependency review only when the repository dependency graph is unavailable.
+
+### Fixed
+
+- Corrected Windows test-process stderr redirection so cross-platform session checks behave consistently.
 
 ## [0.1.1] - 2026-07-27
 
@@ -41,6 +49,7 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 - Local builds no longer require the private updater signing key.
 - GitHub Actions are pinned to immutable commits and release validation runs the full quality and dependency-security gates.
 
-[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/xierruisi/mirro-deck/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.2
 [0.1.1]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.1
 [0.1.0]: https://github.com/xierruisi/mirro-deck/releases/tag/v0.1.0

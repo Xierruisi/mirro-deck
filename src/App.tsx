@@ -54,7 +54,7 @@ function App() {
     loadThemePreference((key) => window.localStorage.getItem(key)),
   );
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
-  const [appVersion, setAppVersion] = useState("0.1.1");
+  const [appVersion, setAppVersion] = useState("0.1.2");
   const deviceRefreshQueueRef = useRef<Promise<Device[] | undefined>>(Promise.resolve(undefined));
   const spinnerRefreshesRef = useRef(0);
 

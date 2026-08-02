@@ -6,6 +6,7 @@ import {
   connectionLabel,
   deserializeScrcpyOptions,
   errorMessage,
+  findNewAvailableWirelessDevice,
   loadScrcpyOptions,
   loadThemePreference,
   operationResultMessage,
@@ -217,6 +218,49 @@ test("theme preference parsing and storage always fall back to system safely", (
     }, "light"),
     false,
   );
+});
+
+test("finds only newly available wireless devices after pairing", () => {
+  const previous: Device[] = [
+    {
+      serial: "usb-1",
+      state: "device",
+      connection: "usb",
+    },
+    {
+      serial: "192.0.2.10:5555",
+      state: "device",
+      connection: "tcpip",
+    },
+  ];
+  const connected: Device = {
+    serial: "adb-device-guid._adb-tls-connect._tcp",
+    state: "device",
+    model: "Pixel 9",
+    connection: "tcpip",
+  };
+  const offline: Device = {
+    serial: "adb-offline-guid._adb-tls-connect._tcp",
+    state: "offline",
+    connection: "tcpip",
+  };
+
+  assert.equal(
+    findNewAvailableWirelessDevice(previous, [
+      ...previous,
+      { serial: "192.0.2.20:5555", state: "offline", connection: "tcpip" },
+      connected,
+    ]),
+    connected,
+  );
+  assert.equal(
+    findNewAvailableWirelessDevice([...previous, offline], [
+      ...previous,
+      { ...offline, state: "device" },
+    ])?.serial,
+    offline.serial,
+  );
+  assert.equal(findNewAvailableWirelessDevice(previous, previous), undefined);
 });
 
 test("errors prefer localized payloads, then useful text, then the unknown fallback", () => {

@@ -29,7 +29,7 @@ The mirrored display opens in a separate native scrcpy window. Select **Stop mir
 
 ## Method 2: connect over Wi-Fi (Android 11 and later)
 
-The computer and Android device must be on the same local network. The first connection requires wireless pairing. After pairing, use the connection address shown on the Wireless debugging page.
+The computer and Android device must be on the same local network. The first connection requires wireless pairing. MirroDeck keeps secure ADB mDNS discovery active, so a paired device normally reconnects automatically even when its wireless debugging port changes.
 
 ### Step 1: pair wirelessly
 
@@ -38,14 +38,16 @@ The computer and Android device must be on the same local network. The first con
 3. In the lower-left corner of MirroDeck, select **Add device → Wi-Fi connection**.
 4. Enter the **IP address and port** from the device's pairing dialog, for example `192.168.1.10:37099`.
 5. Enter the six-digit Wi-Fi pairing code shown on the device, then select **Start pairing**.
-6. After pairing succeeds, MirroDeck automatically advances to the connection step.
+6. After pairing succeeds, MirroDeck waits for ADB to discover and connect the device through mDNS. Once **Available · Wi-Fi** appears in the sidebar, select **Start mirroring**.
 
 Pairing codes and pairing ports are usually valid for only a short time. If pairing fails, reopen **Pair device with pairing code** on the device and use the newly generated details.
 
-### Step 2: connect the device
+### Manual connection fallback
+
+If the local network blocks mDNS or the device does not appear automatically:
 
 1. Return to the main **Wireless debugging** page on the device and find the **IP address and port** shown near the top.
-2. After pairing, use the connection step that MirroDeck opens automatically. If the device is already paired, select **Add device → Wi-Fi connection → Already paired? Continue to connect**.
+2. Use the connection form MirroDeck leaves open after an unsuccessful automatic discovery. If the device was paired earlier, select **Add device → Wi-Fi connection → Already paired? Continue to connect**.
 3. Enter the address from the main Wireless debugging page, then select **Connect device**.
 4. Wait for the device to appear in the left sidebar with the status **Available · Wi-Fi**.
 5. Select the device, then select **Start mirroring**.
@@ -57,10 +59,10 @@ Pairing codes and pairing ports are usually valid for only a short time. If pair
 If the device and computer were paired previously, you normally do not need another pairing code:
 
 1. Make sure the computer and device are still on the same local network, and enable **Wireless debugging** on the device.
-2. Select **Add device → Wi-Fi connection → Already paired? Continue to connect**.
-3. Enter the current IP address and port from the device's main **Wireless debugging** page.
+2. Open MirroDeck. Its persistent ADB mDNS discovery reconnects the device automatically.
+3. Once the device appears as **Available · Wi-Fi**, select it and start mirroring.
 
-The port can change after the device reconnects to the network or Wireless debugging is turned off and on. If connection fails, use the address currently shown on the device.
+The port can change after the device reconnects to the network or Wireless debugging is turned off and on; mDNS resolves the current port automatically. If discovery fails, use the manual connection fallback with the address currently shown on the device.
 
 ## Method 3: connect an Android emulator
 
@@ -96,7 +98,7 @@ The port can change after the device reconnects to the network or Wireless debug
 
 ### Pairing succeeds, but the device does not appear
 
-Pairing grants authorization but does not establish the current connection. Return to the main **Wireless debugging** page on the device, copy its connection address, then enter it in the connection step that MirroDeck opens automatically.
+Keep **Wireless debugging** enabled and confirm that the computer and device are on the same local network. Guest, corporate, campus, and public networks may block mDNS or isolate clients. Select **Restart ADB** and refresh once; if the device still does not appear, enter the connection address from the main Wireless debugging page in the manual connection form.
 
 ### Wireless connection fails
 

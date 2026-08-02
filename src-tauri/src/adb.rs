@@ -16,6 +16,7 @@ use std::{
 const DEVICE_SCAN_TIMEOUT: Duration = Duration::from_secs(10);
 const ADB_OPERATION_TIMEOUT: Duration = Duration::from_secs(20);
 const POLL_INTERVAL: Duration = Duration::from_millis(50);
+const ADB_MDNS_AUTO_CONNECT_SERVICE: &str = "adb-tls-connect";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -44,8 +45,18 @@ pub struct OperationResult {
 fn adb_command(toolchain: &Toolchain) -> Command {
     let mut command = Command::new(&toolchain.adb);
     command.current_dir(&toolchain.directory);
+    // Keep secure wireless discovery enabled whenever MirroDeck is the process
+    // that starts the shared ADB server. ADB persists pairing credentials and
+    // only auto-connects _adb-tls-connect services whose device GUID is known.
+    command
+        .env("ADB_MDNS", "1")
+        .env("ADB_MDNS_AUTO_CONNECT", ADB_MDNS_AUTO_CONNECT_SERVICE);
     hide_console(&mut command);
     command
+}
+
+pub fn start_server(toolchain: &Toolchain) -> Result<OperationResult, AppError> {
+    run_operation(toolchain, &["start-server"], "adb start-server")
 }
 
 pub fn list_devices(toolchain: &Toolchain) -> Result<Vec<Device>, AppError> {
@@ -345,7 +356,10 @@ pub fn parse_devices(output: &str) -> Vec<Device> {
 
             let connection = if serial.starts_with("emulator-") {
                 "emulator"
-            } else if serial.contains(':') {
+            } else if serial.contains(':')
+                || serial.contains("._adb-tls-connect._tcp")
+                || serial.contains("._adb._tcp")
+            {
                 "tcpip"
             } else {
                 "usb"
@@ -378,11 +392,13 @@ mod tests {
             "192.168.1.4:5555 unauthorized transport_id:2\r\n",
             "emulator-5554 offline\r\n",
             "[fe80::1%en0]:4321 device model:Pixel_8_Pro malformed\r\n",
+            "adb-43081FDAS000VS-QXjCrW._adb-tls-connect._tcp device ",
+            "model:Pixel_9 transport_id:5\r\n",
             "SERIAL_ONLY\r\n",
         );
         let devices = parse_devices(output);
 
-        assert_eq!(devices.len(), 5);
+        assert_eq!(devices.len(), 6);
         assert_eq!(devices[0].serial, "R58M123");
         assert_eq!(devices[0].state, "device");
         assert_eq!(devices[0].model.as_deref(), Some("Galaxy S10"));
@@ -395,8 +411,34 @@ mod tests {
         assert_eq!(devices[2].connection, "emulator");
         assert_eq!(devices[3].model.as_deref(), Some("Pixel 8 Pro"));
         assert_eq!(devices[3].connection, "tcpip");
-        assert_eq!(devices[4].state, "unknown");
-        assert_eq!(devices[4].connection, "usb");
+        assert_eq!(devices[4].model.as_deref(), Some("Pixel 9"));
+        assert_eq!(devices[4].connection, "tcpip");
+        assert_eq!(devices[5].state, "unknown");
+        assert_eq!(devices[5].connection, "usb");
+    }
+
+    #[test]
+    fn configures_secure_mdns_auto_connect_for_new_adb_servers() {
+        let toolchain = Toolchain {
+            directory: std::env::temp_dir(),
+            scrcpy: "unused-scrcpy".into(),
+            adb: "adb".into(),
+            server: "unused-server".into(),
+        };
+        let command = adb_command(&toolchain);
+        let environment: HashMap<_, _> = command
+            .get_envs()
+            .filter_map(|(key, value)| value.map(|value| (key, value)))
+            .collect();
+
+        assert_eq!(
+            environment.get(std::ffi::OsStr::new("ADB_MDNS")),
+            Some(&std::ffi::OsStr::new("1"))
+        );
+        assert_eq!(
+            environment.get(std::ffi::OsStr::new("ADB_MDNS_AUTO_CONNECT")),
+            Some(&std::ffi::OsStr::new(ADB_MDNS_AUTO_CONNECT_SERVICE))
+        );
     }
 
     #[test]

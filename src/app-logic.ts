@@ -245,6 +245,21 @@ export function connectionLabel(
   }[connection] ?? connection;
 }
 
+export function findNewAvailableWirelessDevice(
+  previousDevices: readonly Device[],
+  nextDevices: readonly Device[],
+): Device | undefined {
+  const previousStates = new Map(
+    previousDevices.map((device) => [device.serial, device.state]),
+  );
+  return nextDevices.find(
+    (device) =>
+      device.connection === "tcpip" &&
+      device.state === "device" &&
+      previousStates.get(device.serial) !== "device",
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

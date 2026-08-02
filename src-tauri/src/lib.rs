@@ -21,6 +21,14 @@ pub fn run() {
         .manage(AppState { sessions })
         .setup(|app| {
             tray::setup(app)?;
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn_blocking(move || {
+                if let Ok(toolchain) = toolchain::Toolchain::locate(&app_handle) {
+                    // The ADB server owns persistent mDNS discovery and keeps
+                    // paired devices reconnectable across MirroDeck launches.
+                    let _ = adb::start_server(&toolchain);
+                }
+            });
             Ok(())
         })
         .plugin(tauri_plugin_dialog::init())

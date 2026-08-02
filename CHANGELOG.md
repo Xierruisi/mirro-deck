@@ -7,6 +7,10 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 
 ## [Unreleased]
 
+### Changed
+
+- Paired wireless devices now reconnect automatically through persistent ADB mDNS discovery, while manual connection remains available as a fallback.
+
 ## [0.1.1] - 2026-07-27
 
 ### Added

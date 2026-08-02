@@ -19,6 +19,7 @@ import {
   connectionGuidance,
   connectionLabel,
   errorMessage,
+  findNewAvailableWirelessDevice,
   loadScrcpyOptions,
   loadThemePreference,
   operationResultMessage,
@@ -54,7 +55,7 @@ function App() {
   );
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
   const [appVersion, setAppVersion] = useState("0.1.1");
-  const deviceRefreshQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const deviceRefreshQueueRef = useRef<Promise<Device[] | undefined>>(Promise.resolve(undefined));
   const spinnerRefreshesRef = useRef(0);
 
   useEffect(() => {
@@ -85,8 +86,8 @@ function App() {
       setIsRefreshing(true);
     }
 
-    const queuedRefresh = deviceRefreshQueueRef.current.then(async () => {
-      if (!showSpinner && document.hidden) return;
+    const queuedRefresh = deviceRefreshQueueRef.current.then(async (): Promise<Device[] | undefined> => {
+      if (!showSpinner && document.hidden) return undefined;
       try {
         const nextDevices = await api.devices();
         setDevices(nextDevices);
@@ -95,8 +96,10 @@ function App() {
           if (current && nextDevices.some((device) => device.serial === current)) return current;
           return nextDevices.find((device) => device.state === "device")?.serial ?? nextDevices[0]?.serial;
         });
+        return nextDevices;
       } catch (error) {
         setScanError(errorMessage(error, t));
+        return undefined;
       }
     });
 
@@ -246,10 +249,25 @@ function App() {
         ? await api.pair(address.trim(), pairingCode.trim())
         : await api.connect(address.trim());
       if (result.success && isPairing) {
+        const devicesBeforePairing = devices;
         setAddress("");
         setPairingCode("");
         setOperationMessage(t("dialog.pairSuccess"));
         setConnectionDialog("connect");
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+          const nextDevices = await refreshDevices(attempt === 0);
+          const connectedDevice = nextDevices
+            ? findNewAvailableWirelessDevice(devicesBeforePairing, nextDevices)
+            : undefined;
+          if (connectedDevice) {
+            setSelectedSerial(connectedDevice.serial);
+            setConnectionDialog(undefined);
+            break;
+          }
+          if (attempt < 5) {
+            await new Promise((resolve) => window.setTimeout(resolve, 500));
+          }
+        }
       } else {
         setOperationMessage(operationResultMessage(result, t));
       }

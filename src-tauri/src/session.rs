@@ -798,11 +798,11 @@ mod tests {
                 FakeProcess::LongRunning => concat!(
                     "@echo off\r\n",
                     "echo stdout line\r\n",
-                    "echo stderr line 1>&2\r\n",
+                    "1>&2 echo stderr line\r\n",
                     "ping -n 31 127.0.0.1 >NUL\r\n",
                 ),
                 FakeProcess::Successful => "@echo off\r\necho done\r\nexit /b 0\r\n",
-                FakeProcess::Failed => "@echo off\r\necho failed 1>&2\r\nexit /b 7\r\n",
+                FakeProcess::Failed => "@echo off\r\n1>&2 echo failed\r\nexit /b 7\r\n",
             };
             (directory.join("fake-scrcpy.cmd"), contents)
         };

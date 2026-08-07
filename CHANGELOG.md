@@ -7,7 +7,7 @@ Notable changes to MirroDeck are documented in this file. Versions follow
 
 ## [Unreleased]
 
-## [0.1.2] - 2026-08-03
+## [0.1.2] - 2026-08-08
 
 ### Changed
 

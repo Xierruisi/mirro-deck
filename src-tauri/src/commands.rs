@@ -60,6 +60,19 @@ pub async fn list_devices(app: AppHandle) -> Result<Vec<Device>, AppError> {
 }
 
 #[tauri::command]
+pub async fn scan_lan_devices(app: AppHandle) -> Result<Vec<Device>, AppError> {
+    let worker_app = app.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let toolchain = Toolchain::locate(&worker_app)?;
+        adb::scan_lan_devices(&toolchain)
+    })
+    .await
+    .map_err(|error| {
+        AppError::new("backend.error.lanScanTask").with_value("details", error.to_string())
+    })?
+}
+
+#[tauri::command]
 pub async fn pair_device(
     app: AppHandle,
     address: String,

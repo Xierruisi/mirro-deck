@@ -36,6 +36,7 @@ export function createApi(
       platform: "browser",
     }),
     devices: () => invokeOrFallback<Device[]>("list_devices", []),
+    lanDevices: () => invokeOrFallback<Device[]>("scan_lan_devices", []),
     sessions: () => invokeOrFallback<SessionInfo[]>("list_sessions", []),
     start: (request: StartSessionRequest) =>
       invokeCommand<SessionInfo>("start_session", { request }),

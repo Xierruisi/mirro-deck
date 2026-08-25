@@ -47,6 +47,7 @@ const statusStyles: Record<string, string> = {
   device: "bg-emerald-400",
   unauthorized: "bg-amber-400",
   offline: "bg-brand-coral",
+  discovered: "bg-sky-400",
 };
 
 export function AppSidebar({
@@ -268,6 +269,7 @@ function deviceStateLabel(state: string, t: Translate) {
       device: t("device.state.available"),
       unauthorized: t("device.state.unauthorized"),
       offline: t("device.state.offline"),
+      discovered: t("device.state.discovered"),
     }[state] || state
   );
 }

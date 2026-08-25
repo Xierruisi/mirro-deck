@@ -7,7 +7,7 @@ use serde::Serialize;
 use std::{
     collections::HashMap,
     io::Write,
-    net::{Ipv4Addr, Ipv6Addr},
+    net::{Ipv4Addr, Ipv6Addr, SocketAddr, TcpStream, UdpSocket},
     process::{Child, Command, Output, Stdio},
     thread,
     time::{Duration, Instant},
@@ -16,6 +16,7 @@ use std::{
 const DEVICE_SCAN_TIMEOUT: Duration = Duration::from_secs(10);
 const ADB_OPERATION_TIMEOUT: Duration = Duration::from_secs(20);
 const POLL_INTERVAL: Duration = Duration::from_millis(50);
+const LAN_SCAN_TIMEOUT: Duration = Duration::from_millis(250);
 const ADB_MDNS_AUTO_CONNECT_SERVICE: &str = "adb-tls-connect";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -75,6 +76,122 @@ pub fn list_devices(toolchain: &Toolchain) -> Result<Vec<Device>, AppError> {
     }
 
     Ok(parse_devices(&String::from_utf8_lossy(&output.stdout)))
+}
+
+pub fn scan_lan_devices(toolchain: &Toolchain) -> Result<Vec<Device>, AppError> {
+    let mut devices = run_capture(toolchain, &["mdns", "services"], "adb mdns services")
+        .map(|output| parse_mdns_services(&String::from_utf8_lossy(&output.stdout)))
+        .unwrap_or_default();
+
+    if let Some(local_address) = default_local_ipv4() {
+        for device in scan_legacy_adb(local_address) {
+            if !devices
+                .iter()
+                .any(|existing| existing.serial == device.serial)
+            {
+                devices.push(device);
+            }
+        }
+    }
+
+    Ok(devices)
+}
+
+fn run_capture(
+    toolchain: &Toolchain,
+    arguments: &[&str],
+    operation: &str,
+) -> Result<Output, AppError> {
+    let mut command = adb_command(toolchain);
+    command
+        .args(arguments)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let child = command.spawn().map_err(|error| {
+        AppError::new("backend.error.runAdb").with_value("details", error.to_string())
+    })?;
+    let output = wait_with_output_timeout(child, ADB_OPERATION_TIMEOUT, operation)?;
+    if !output.status.success() {
+        return Err(command_error(&output.stderr));
+    }
+    Ok(output)
+}
+
+fn default_local_ipv4() -> Option<Ipv4Addr> {
+    let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, 0)).ok()?;
+    socket.connect((Ipv4Addr::new(1, 1, 1, 1), 80)).ok()?;
+    match socket.local_addr().ok()?.ip() {
+        std::net::IpAddr::V4(address) if !address.is_loopback() => Some(address),
+        _ => None,
+    }
+}
+
+fn scan_ipv4_subnet(local_address: Ipv4Addr) -> impl Iterator<Item = Ipv4Addr> {
+    let octets = local_address.octets();
+    (1..=254).filter_map(move |last| {
+        let address = Ipv4Addr::new(octets[0], octets[1], octets[2], last);
+        (address != local_address).then_some(address)
+    })
+}
+
+fn scan_legacy_adb(local_address: Ipv4Addr) -> Vec<Device> {
+    let hosts: Vec<_> = scan_ipv4_subnet(local_address).collect();
+    thread::scope(|scope| {
+        hosts
+            .chunks(32)
+            .map(|chunk| {
+                scope.spawn(move || {
+                    chunk
+                        .iter()
+                        .filter(|host| {
+                            TcpStream::connect_timeout(
+                                &SocketAddr::from((**host, 5555)),
+                                LAN_SCAN_TIMEOUT,
+                            )
+                            .is_ok()
+                        })
+                        .map(|host| discovered_device(format!("{host}:5555")))
+                        .collect::<Vec<_>>()
+                })
+            })
+            .flat_map(|worker| worker.join().unwrap_or_default())
+            .collect()
+    })
+}
+
+fn discovered_device(serial: String) -> Device {
+    Device {
+        serial,
+        state: "discovered".to_owned(),
+        model: None,
+        product: None,
+        device: None,
+        transport_id: None,
+        connection: "tcpip".to_owned(),
+    }
+}
+
+pub fn parse_mdns_services(output: &str) -> Vec<Device> {
+    let mut devices = Vec::new();
+    for line in output.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with("List of discovered") {
+            continue;
+        }
+        let address = line
+            .split_whitespace()
+            .find(|column| validate_address(column).is_ok());
+        if let Some(address) = address {
+            let serial = address.to_owned();
+            if !devices
+                .iter()
+                .any(|device: &Device| device.serial == serial)
+            {
+                devices.push(discovered_device(serial));
+            }
+        }
+    }
+    devices
 }
 
 fn wait_with_output_timeout(
@@ -415,6 +532,34 @@ mod tests {
         assert_eq!(devices[4].connection, "tcpip");
         assert_eq!(devices[5].state, "unknown");
         assert_eq!(devices[5].connection, "usb");
+    }
+
+    #[test]
+    fn parses_mdns_addresses_and_deduplicates_services() {
+        let output = concat!(
+            "List of discovered mdns services\n",
+            "adb-tls-connect._tcp adb-abc._adb-tls-connect._tcp 192.168.1.20:37123\n",
+            "adb-tls-pairing._tcp adb-def._adb-tls-pairing._tcp 192.168.1.21:42111\n",
+            "adb-tls-connect._tcp adb-abc._adb-tls-connect._tcp 192.168.1.20:37123\n",
+            "not-an-address\n",
+        );
+        let devices = parse_mdns_services(output);
+
+        assert_eq!(devices.len(), 2);
+        assert_eq!(devices[0].serial, "192.168.1.20:37123");
+        assert_eq!(devices[0].state, "discovered");
+        assert_eq!(devices[0].connection, "tcpip");
+        assert_eq!(devices[1].serial, "192.168.1.21:42111");
+    }
+
+    #[test]
+    fn builds_a_private_subnet_without_scanning_local_host() {
+        let hosts: Vec<_> = scan_ipv4_subnet(Ipv4Addr::new(192, 168, 1, 42)).collect();
+
+        assert_eq!(hosts.len(), 253);
+        assert!(!hosts.contains(&Ipv4Addr::new(192, 168, 1, 42)));
+        assert!(hosts.contains(&Ipv4Addr::new(192, 168, 1, 1)));
+        assert!(hosts.contains(&Ipv4Addr::new(192, 168, 1, 254)));
     }
 
     #[test]

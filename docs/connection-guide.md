@@ -64,12 +64,29 @@ If the device and computer were paired previously, you normally do not need anot
 
 The port can change after the device reconnects to the network or Wireless debugging is turned off and on; mDNS resolves the current port automatically. If discovery fails, use the manual connection fallback with the address currently shown on the device.
 
+### Scan the local network
+
+Click the refresh button in the upper-right corner of the device list. MirroDeck refreshes current ADB devices, then scans ADB mDNS services and the legacy `5555` port on the current local network. Candidates appear as **Discovered · Wi-Fi**; select one and choose **Connect device** to try connecting.
+
+The scan probes only the `/24` IPv4 subnet of the current network interface by default and does not complete wireless debugging pairing automatically. First-time pairing still requires the six-digit code shown by the device. Guest, enterprise, or client-isolated networks may prevent device discovery.
+
 ## Method 3: connect an Android emulator
 
 1. Start Android Studio Emulator or another local emulator that is accessible through adb.
 2. Open MirroDeck, or select the refresh button in the upper-right corner of the device list.
 3. Wait for a device with a name such as `emulator-5554` to appear with the status **Available · Emulator**.
 4. Select the emulator, then select **Start mirroring**.
+
+## Mirror multiple devices at once
+
+MirroDeck can run mirror sessions for multiple authorized devices at the same time:
+
+1. Select the first device with the **Available** status and choose **Start mirroring**.
+2. Wait for its independent scrcpy window to open, then select another device in the sidebar.
+3. Choose **Start mirroring** for the second device.
+4. The **LIVE** marker in the device list indicates an active mirror session.
+
+Each device has its own scrcpy process and window. Resolution, audio, control, and window options are currently global defaults: changing them does not alter already-running sessions, but affects devices started afterward. One-click start-all and batch stop are not supported yet.
 
 ## Connection statuses
 

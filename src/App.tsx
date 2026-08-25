@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { getVersion } from "@tauri-apps/api/app";
 import { listen } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
-import { ChevronLeft, CircleAlert, Info, LoaderCircle, Play, RotateCcw, Square, X } from "lucide-react";
+import { ChevronLeft, CircleAlert, Info, Link2, LoaderCircle, Play, RotateCcw, Square, X } from "lucide-react";
 
 import { api } from "@/api";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -35,6 +35,7 @@ function App() {
   const settingsSectionHeaders = useSettingsSectionHeaders();
   const [toolchain, setToolchain] = useState<ToolchainInfo>();
   const [devices, setDevices] = useState<Device[]>([]);
+  const [lanDevices, setLanDevices] = useState<Device[]>([]);
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>();
   const [options, setOptions] = useState<ScrcpyOptions>(() =>
@@ -63,9 +64,13 @@ function App() {
     void getVersion().then(setAppVersion).catch(() => undefined);
   }, []);
 
+  const allDevices = useMemo(() => {
+    const connectedSerials = new Set(devices.map((device) => device.serial));
+    return [...devices, ...lanDevices.filter((device) => !connectedSerials.has(device.serial))];
+  }, [devices, lanDevices]);
   const selectedDevice = useMemo(
-    () => devices.find((device) => device.serial === selectedSerial),
-    [devices, selectedSerial],
+    () => allDevices.find((device) => device.serial === selectedSerial),
+    [allDevices, selectedSerial],
   );
   const selectedSession = useMemo(
     () => sessions.find((session) => session.deviceSerial === selectedSerial),
@@ -93,7 +98,13 @@ function App() {
         setDevices(nextDevices);
         setScanError(undefined);
         setSelectedSerial((current) => {
-          if (current && nextDevices.some((device) => device.serial === current)) return current;
+          if (
+            current &&
+            (nextDevices.some((device) => device.serial === current) ||
+              lanDevices.some((device) => device.serial === current))
+          ) {
+            return current;
+          }
           return nextDevices.find((device) => device.state === "device")?.serial ?? nextDevices[0]?.serial;
         });
         return nextDevices;
@@ -109,7 +120,25 @@ function App() {
       spinnerRefreshesRef.current = Math.max(0, spinnerRefreshesRef.current - 1);
       if (spinnerRefreshesRef.current === 0) setIsRefreshing(false);
     });
+  }, [lanDevices, t]);
+
+  const scanLanDevices = useCallback(async () => {
+    try {
+      setLanDevices(await api.lanDevices());
+    } catch (error) {
+      setScanError(errorMessage(error, t));
+    }
   }, [t]);
+
+  const refreshAllDevices = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshDevices();
+      await scanLanDevices();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshDevices, scanLanDevices]);
 
   useEffect(() => {
     void api.toolchain().then(setToolchain).catch(() => {
@@ -230,6 +259,21 @@ function App() {
     }
   }
 
+  async function connectDiscoveredDevice() {
+    if (!selectedDevice || selectedDevice.state !== "discovered") return;
+    setOperationBusy(true);
+    setOperationMessage(undefined);
+    try {
+      const result = await api.connect(selectedDevice.serial);
+      setOperationMessage(operationResultMessage(result, t));
+      if (result.success) await refreshDevices(true);
+    } catch (error) {
+      setOperationMessage(errorMessage(error, t));
+    } finally {
+      setOperationBusy(false);
+    }
+  }
+
   async function stopSession() {
     if (!selectedSession) return;
     try {
@@ -249,7 +293,7 @@ function App() {
         ? await api.pair(address.trim(), pairingCode.trim())
         : await api.connect(address.trim());
       if (result.success && isPairing) {
-        const devicesBeforePairing = devices;
+        const devicesBeforePairing = allDevices;
         setAddress("");
         setPairingCode("");
         setOperationMessage(t("dialog.pairSuccess"));
@@ -347,7 +391,7 @@ function App() {
       <div className="relative min-h-0 flex-1 overflow-hidden bg-sidebar">
         <SidebarProvider className="relative h-full min-h-0">
           <AppSidebar
-            devices={devices}
+            devices={allDevices}
             sessions={sessions}
             selectedSerial={selectedSerial}
             isRefreshing={isRefreshing}
@@ -357,7 +401,7 @@ function App() {
               setView("device");
               setSettingsSection(null);
             }}
-            onRefresh={() => void refreshDevices(true)}
+            onRefresh={() => void refreshAllDevices()}
             onAddDevice={() => openConnectionDialog("choose")}
             onSettingsOpen={() => {
               setView("settings");
@@ -413,6 +457,11 @@ function App() {
                   {selectedSession ? (
                     <Button variant="outline" className="border-destructive/25 bg-destructive/5 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void stopSession()}>
                       <Square className="fill-current" />{t("app.stopMirroring")}
+                    </Button>
+                  ) : selectedDevice?.state === "discovered" ? (
+                    <Button className="min-w-32" disabled={operationBusy} onClick={() => void connectDiscoveredDevice()}>
+                      {operationBusy ? <LoaderCircle className="animate-spin" /> : <Link2 />}
+                      {operationBusy ? t("dialog.processing") : t("dialog.connectDevice")}
                     </Button>
                   ) : (
                     <Button

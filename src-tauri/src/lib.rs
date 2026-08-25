@@ -38,6 +38,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_toolchain_info,
             commands::list_devices,
+            commands::scan_lan_devices,
             commands::pair_device,
             commands::connect_device,
             commands::disconnect_device,

@@ -73,6 +73,12 @@ Published builds are available on the [GitHub Releases](https://github.com/xierr
 
 USB is the simplest option for first-time authorization. For wireless debugging, pairing and connecting normally use different ports; the [connection guide](docs/connection-guide.md) walks through both steps.
 
+### Mirroring multiple devices
+
+MirroDeck can mirror multiple authorized Android devices at the same time. Select one device and choose **Start mirroring**, then select another device and repeat; each device gets an independent scrcpy window, and the **LIVE** marker indicates an active mirror session.
+
+Mirroring options are currently global defaults rather than per-device profiles. Changing resolution, bit rate, audio, control, or window options does not change already-running scrcpy sessions, but the new values are used when starting another device. MirroDeck cleans up all mirror subprocesses on exit; one-click start-all and batch stop are not supported yet.
+
 ## Development
 
 ### Prerequisites

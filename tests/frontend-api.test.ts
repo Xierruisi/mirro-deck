@@ -17,6 +17,7 @@ test("browser API calls return deterministic fallbacks without invoking Tauri", 
     platform: "browser",
   });
   assert.deepEqual(await api.devices(), []);
+  assert.deepEqual(await api.lanDevices(), []);
   assert.deepEqual(await api.sessions(), []);
   assert.equal(await api.stop("session-1"), undefined);
   assert.deepEqual(await api.pair("192.0.2.1:37123", "123456"), {
@@ -51,7 +52,7 @@ test("desktop API calls use the exact Tauri command and argument shapes", async 
     if (command === "get_toolchain_info") {
       return { available: true, platform: "test" } as T;
     }
-    if (command === "list_devices" || command === "list_sessions") {
+    if (command === "list_devices" || command === "scan_lan_devices" || command === "list_sessions") {
       return [] as T;
     }
     if (command === "start_session") {
@@ -83,6 +84,7 @@ test("desktop API calls use the exact Tauri command and argument shapes", async 
 
   await api.toolchain();
   await api.devices();
+  await api.lanDevices();
   await api.sessions();
   await api.start(request);
   await api.stop("session-1");
@@ -94,6 +96,7 @@ test("desktop API calls use the exact Tauri command and argument shapes", async 
   assert.deepEqual(calls, [
     { command: "get_toolchain_info", args: undefined },
     { command: "list_devices", args: undefined },
+    { command: "scan_lan_devices", args: undefined },
     { command: "list_sessions", args: undefined },
     { command: "start_session", args: { request } },
     { command: "stop_session", args: { sessionId: "session-1" } },
